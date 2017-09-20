@@ -1,0 +1,54 @@
+#setting working directory
+>setwd("~/Desktop/R_tcalif")
+
+#loading in the libraries for promoter extraction
+>library("BiocInstaller", lib.loc="/Library/Frameworks/R.framework/Versions/3.4/Resources/library")
+>library("BSgenome", lib.loc="/Library/Frameworks/R.framework/Versions/3.4/Resources/library")
+>library("Biostrings", lib.loc="/Library/Frameworks/R.framework/Versions/3.4/Resources/library")
+>library("GenomicFeatures", lib.loc="/Library/Frameworks/R.framework/Versions/3.4/Resources/library")
+
+#setting up the GFF3 file of transcript annotations
+>TCALIF_txdb <- makeTxDbFromGFF("TCALIF_genome_v2.1_estRM3.gff3")
+>TCALIF_gtf <- import('TCALIF_genome_v2.1_estRM3.gff3')
+>tcalif_genes <- genes(TCALIF_txdb)
+
+#checking on the column names of the GFF file
+>colnames(mcols(TCALIF_gtf))
+
+# [1] "source"  "type"    "score"   "phase"   "ID"      "Name"    "Target"  "Parent" 
+# [9] "_AED"    "_eAED"   "_QI"     "score.1" "Alias"   "Gap"  
+
+#checking on the table format of the GFF file, included output below
+>table(TCALIF_gtf$type)
+
+#                  contig                    match               match_part 
+#                     459                   227368                   571414 
+#                    gene                     mRNA                     exon 
+#                   15858                    15858                    69961 
+#          five_prime_UTR                      CDS            protein_match 
+#                   11899                    66978                    32191 
+#expressed_sequence_match          three_prime_UTR 
+                   31974                     8503 
+#isolating the genes of the GFF file, included output below
+>tcalif_pcg <- TCALIF_gtf[TCALIF_gtf$type == "gene"]
+>summary(width(tcalif_pcg))
+#   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#    134    1232    2478    4065    5091   62825 
+>length(tcalif_pcg)
+#[1] 15858
+
+#isolating the promoter regions of Xkb per gene region in previous section, included output below
+>tcalif_pcg_1kb_up <- flank(tcalif_pcg, width=1000)
+>tcalif_pcg_1kb_up2 <- promoters(tcalif_pcg, upstream=1000, downstream=0)
+
+#exporting at bed file
+>df <- data.frame(seqnames=seqnames(tcalif_pcg_1kb_up2),
+                  starts=start(tcalif_pcg_1kb_up2)-1,
+                  ends=end(tcalif_pcg_1kb_up2),
+                  names=c(rep(".", length(tcalif_pcg_1kb_up2))),
+                  scores=c(rep(".", length(tcalif_pcg_1kb_up2))),
+                  strands=strand(tcalif_pcg_1kb_up2)) 
+>write.table(df, file="tcalif_promoter_1kb.bed", quote=F, sep="\t", row.names=F, col.names=F)
+
+#using bedtools in command line (ignored most of the contigs because of missing upstream sequence)
+>bedtools getfasta -fo tcalif_promoter.fa -fi TCALIF_genome_v2.1.fasta -bed tcalif_promoter_1kb.bed
