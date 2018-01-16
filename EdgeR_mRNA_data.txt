@@ -332,7 +332,6 @@ $df.total
 BR_mtDNA_COX1      -2.291013e-01 14.234816 3.403018e+00 1.084160e-01
 ...and alot more lines
 
-R_TCALIF_00020-PA  2.152432e-01  5.537988 5.777519e+00 4.788328e-02
 > write.table(qlf$table,"BR_edgeR_output.txt")
 > qlf$table$PValue
    [1] 1.084160e-01 3.456138e-03 1.606708e-04 1.752035e-02 1.198993e-02 2.571122e-04 1.431472e-02 1.632699e-03 9.909984e-04
@@ -345,8 +344,6 @@ R_TCALIF_00020-PA  2.152432e-01  5.537988 5.777519e+00 4.788328e-02
  [ reached getOption("max.print") -- omitted 9601 entries ]
 
 > BR_fdr = p.adjust(qlf$table$PValue, method = "fdr")
-> head qlf$table
-Error: unexpected symbol in "head qlf"
 > head(qlf$table)
                    logFC   logCPM         F       PValue
 BR_mtDNA_COX1 -0.2291013 14.23482  3.403018 0.1084159561
