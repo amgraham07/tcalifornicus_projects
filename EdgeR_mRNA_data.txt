@@ -1,0 +1,390 @@
+A.Graham Jan 2018
+general use: EdgeR for RNA-seq experiment, based on portions of EdgeR manual
+example: EdgeR for BR temperature mRNA (miRNA experiment), after using Salmon to pseudoalign against a T.calif CDS reference for 6 samples (3 replicates for 33 degrees, and 3 replicates for control temperature)
+
+Files needed include...
+(1) combined txt file with all counts (ie. output.sf files)
+
+------------------------------------------------------------
+Specific Commands, :
+
+#reads .txt file of sf counts
+x <- read.delim("BR_temperature_mRNA_counts_all.txt",row.names="Name")
+head(x)
+#specifies the  groups for which to analyze, and in what order they are in the .txt file - in this case "2" is experimental temperature and "1" is control
+group <- factor(c(2,2,2,1,1,1))
+y <- DGEList(counts=x,group=group)
+y
+y$samples
+#starts filtering the data based on counts per million (ie. cpm)
+keep <- rowSums(cpm(y)>3) >= 3
+y <- y[keep, , keep.lib.sizes=FALSE]
+y <- calcNormFactors(y)
+y$samples
+design <- model.matrix(~group)
+y <- estimateDisp(y,design)
+y
+fit <- glmQLFit(y,design)
+qlf <- glmQLFTest(fit,coef=2)
+#shows you the top up-gregulated tags
+topTags(qlf)
+qlf
+qlf$table
+#writes output (sans FDR)
+write.table(qlf$table,"BR_edgeR_output.txt")
+qlf$table$PValue
+p.adjust(qlf$table$PValue, method = "fdr")
+SD_fdr = p.adjust(qlf$table$PValue, method = "fdr")
+head(qlf$table)
+SD_edgeR_final = cbind(qlf$table,BR_fdr)
+head(SD_edgeR_final)
+#writes the FDR associated with the previous output
+write.table(BR_edgeR_final,"BR_edgeR_output_final.txt")
+#makes a basic volcano plot
+plotMD(qlf)
+logcpm <- cpm(y, prior.count=2, log=FALSE)
+head(logcpm)
+write.table(logcpm,"BR_edgeR_output_cpm.txt")
+#performs a "PCA" of the samples
+plotMDS(y)
+
+-------------------------------------------------------------
+Commands + (some of the) output:
+
+R version 3.4.3 (2017-11-30) -- "Kite-Eating Tree"
+Copyright (C) 2017 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> setwd("~/Desktop/R_tcalif")
+> library("edgeR", lib.loc="/Library/Frameworks/R.framework/Versions/3.4/Resources/library")
+Loading required package: limma
+> x <- read.delim("BR_temperature_mRNA_counts_all.txt",row.names="Name")
+> head(x)
+              BR33_1 BR33_2 BR33_3 Brcon_1 Brcon_2 Brcon_3
+BR_mtDNA_COX1 319978 458143 309136  229831  291992  296978
+BR_mtDNA_NAD2  90508 115331  78744   72844   87045   92588
+BR_mtDNA_NAD1  34857  44904  27866   32885   38458   42902
+BR_mtDNA_COX2 120181 151520 106018   92364  103258  117033
+BR_mtDNA_CYTB  96200 132694  91121   75824   90687  101546
+BR_mtDNA_NAD4  50378  67324  43066   49780   54605   63681
+> group <- factor(c(2,2,2,1,1,1))
+> y <- DGEList(counts=x,group=group)
+> y
+An object of class "DGEList"
+$counts
+              BR33_1 BR33_2 BR33_3 Brcon_1 Brcon_2 Brcon_3
+BR_mtDNA_COX1 319978 458143 309136  229831  291992  296978
+BR_mtDNA_NAD2  90508 115331  78744   72844   87045   92588
+BR_mtDNA_NAD1  34857  44904  27866   32885   38458   42902
+BR_mtDNA_COX2 120181 151520 106018   92364  103258  117033
+BR_mtDNA_CYTB  96200 132694  91121   75824   90687  101546
+14048 more rows ...
+
+$samples
+        group lib.size norm.factors
+BR33_1      2 19540188            1
+BR33_2      2 27515739            1
+BR33_3      2 17148383            1
+Brcon_1     1 11325582            1
+Brcon_2     1 13039569            1
+Brcon_3     1 13534063            1
+
+> y$samples
+        group lib.size norm.factors
+BR33_1      2 19540188            1
+BR33_2      2 27515739            1
+BR33_3      2 17148383            1
+Brcon_1     1 11325582            1
+Brcon_2     1 13039569            1
+Brcon_3     1 13534063            1
+> keep <- rowSums(cpm(y)>3) >= 3
+> y <- y[keep, , keep.lib.sizes=FALSE]
+> y <- calcNormFactors(y)
+> y$samples
+        group lib.size norm.factors
+BR33_1      2 19493591    0.9605304
+BR33_2      2 27434026    0.9755404
+BR33_3      2 17108986    0.9485201
+Brcon_1     1 11243431    1.0368917
+Brcon_2     1 12997874    1.0608906
+Brcon_3     1 13484101    1.0228056
+> design <- model.matrix(~group)
+> y <- estimateDisp(y,design)
+> y
+An object of class "DGEList"
+$counts
+              BR33_1 BR33_2 BR33_3 Brcon_1 Brcon_2 Brcon_3
+BR_mtDNA_COX1 319978 458143 309136  229831  291992  296978
+BR_mtDNA_NAD2  90508 115331  78744   72844   87045   92588
+BR_mtDNA_NAD1  34857  44904  27866   32885   38458   42902
+BR_mtDNA_COX2 120181 151520 106018   92364  103258  117033
+BR_mtDNA_CYTB  96200 132694  91121   75824   90687  101546
+10596 more rows ...
+
+$samples
+        group lib.size norm.factors
+BR33_1      2 19493591    0.9605304
+BR33_2      2 27434026    0.9755404
+BR33_3      2 17108986    0.9485201
+Brcon_1     1 11243431    1.0368917
+Brcon_2     1 12997874    1.0608906
+Brcon_3     1 13484101    1.0228056
+
+$design
+  (Intercept) group2
+1           1      1
+2           1      1
+3           1      1
+4           1      0
+5           1      0
+6           1      0
+attr(,"assign")
+[1] 0 1
+attr(,"contrasts")
+attr(,"contrasts")$group
+[1] "contr.treatment"
+
+
+$common.dispersion
+[1] 0.04430915
+
+$trended.dispersion
+[1] 0.04249298 0.04365796 0.04447400 0.04342696 0.04357948
+10596 more elements ...
+
+$tagwise.dispersion
+[1] 0.01829683 0.01859925 0.01903345 0.01977782 0.01949850
+10596 more elements ...
+
+$AveLogCPM
+[1] 14.23482 12.43697 11.18584 12.79056 12.55693
+10596 more elements ...
+
+$trend.method
+[1] "locfit"
+
+$prior.df
+[1] 2.866862
+
+$prior.n
+[1] 0.7167155
+
+$span
+[1] 0.3015078
+
+> fit <- glmQLFit(y,design)
+> qlf <- glmQLFTest(fit,coef=2)
+> topTags(qlf)
+Coefficient:  group2 
+                      logFC    logCPM         F       PValue          FDR
+BR_TCALIF_11295-PA 4.206382  5.855100 1833.1434 1.354721e-09 8.746143e-06
+BR_TCALIF_00753-PA 4.590332 11.368219 1730.4746 1.650060e-09 8.746143e-06
+BR_TCALIF_04316-PA 3.331985  6.241210 1392.2095 3.471793e-09 1.055305e-05
+BR_TCALIF_09395-PA 3.504840  8.197601 1169.8945 6.291341e-09 1.055305e-05
+BR_TCALIF_12107-PA 2.849132  6.185210 1145.8369 6.754047e-09 1.055305e-05
+BR_TCALIF_13715-PA 5.684422 12.057143 1144.9667 6.771595e-09 1.055305e-05
+BR_TCALIF_04918-PA 4.637432  7.672155 1135.4049 6.968339e-09 1.055305e-05
+BR_TCALIF_05614-PA 3.153844  9.045741 1019.8777 1.005161e-08 1.331964e-05
+BR_TCALIF_11487-PA 6.734933 11.050149  926.0427 1.397200e-08 1.455356e-05
+BR_TCALIF_10081-PA 9.803389 11.706372  922.3705 1.416266e-08 1.455356e-05
+> qlf
+An object of class "DGELRT"
+$coefficients
+              (Intercept)     group2
+BR_mtDNA_COX1   -3.872441 -0.1588009
+BR_mtDNA_NAD2   -5.047602 -0.3200396
+BR_mtDNA_NAD1   -5.840692 -0.5061937
+BR_mtDNA_COX2   -4.832625 -0.2498841
+BR_mtDNA_CYTB   -4.988706 -0.2633125
+10596 more rows ...
+
+$fitted.values
+                 BR33_1   BR33_2    BR33_3   Brcon_1   Brcon_2   Brcon_3
+BR_mtDNA_COX1 332396.79 475104.0 288087.64 242578.58 286921.53 286969.22
+BR_mtDNA_NAD2  87350.50 124852.5  75706.50  74900.76  88592.50  88607.22
+BR_mtDNA_NAD1  32808.29  46893.8  28434.88  33888.37  40083.10  40089.77
+BR_mtDNA_COX2 116170.71 166046.0 100684.92  92864.40 109839.85 109858.11
+BR_mtDNA_CYTB  98057.28 140156.0  84986.05  79444.60  93966.94  93982.56
+10596 more rows ...
+
+$deviance
+BR_mtDNA_COX1 BR_mtDNA_NAD2 BR_mtDNA_NAD1 BR_mtDNA_COX2 BR_mtDNA_CYTB 
+    0.2868156     0.2750356     0.2986291     0.4573412     0.4086822 
+10596 more elements ...
+
+$method
+[1] "oneway"
+
+$unshrunk.coefficients
+              (Intercept)     group2
+BR_mtDNA_COX1   -3.872441 -0.1588010
+BR_mtDNA_NAD2   -5.047603 -0.3200401
+BR_mtDNA_NAD1   -5.840695 -0.5061954
+BR_mtDNA_COX2   -4.832626 -0.2498843
+BR_mtDNA_CYTB   -4.988707 -0.2633128
+10596 more rows ...
+
+$df.residual
+[1] 4 4 4 4 4
+10596 more elements ...
+
+$design
+  (Intercept) group2
+1           1      1
+2           1      1
+3           1      1
+4           1      0
+5           1      0
+6           1      0
+attr(,"assign")
+[1] 0 1
+attr(,"contrasts")
+attr(,"contrasts")$group
+[1] "contr.treatment"
+
+
+$offset
+         [,1]     [,2]     [,3]     [,4]     [,5]     [,6]
+[1,] 16.74533 17.10253 16.60226 16.27152 16.43941 16.43957
+attr(,"class")
+[1] "CompressedMatrix"
+attr(,"Dims")
+[1] 5 6
+attr(,"repeat.row")
+[1] TRUE
+attr(,"repeat.col")
+[1] FALSE
+10596 more rows ...
+
+$dispersion
+[1] 0.04249298 0.04365796 0.04447400 0.04342696 0.04357948
+10596 more elements ...
+
+$prior.count
+[1] 0.125
+
+$AveLogCPM
+[1] 14.23482 12.43697 11.18584 12.79056 12.55693
+10596 more elements ...
+
+$df.residual.zeros
+[1] 4 4 4 4 4
+10596 more elements ...
+
+$df.prior
+[1] 2.866862
+
+$var.post
+BR_mtDNA_COX1 BR_mtDNA_NAD2 BR_mtDNA_NAD1 BR_mtDNA_COX2 BR_mtDNA_CYTB 
+    0.2612925     0.1840375     0.1549749     0.2224582     0.2073815 
+10596 more elements ...
+
+$var.prior
+BR_mtDNA_COX1 BR_mtDNA_NAD2 BR_mtDNA_NAD1 BR_mtDNA_COX2 BR_mtDNA_CYTB 
+    0.5258167     0.3448804     0.2670384     0.3733171     0.3541775 
+10596 more elements ...
+
+$samples
+        group lib.size norm.factors
+BR33_1      2 19493591    0.9605304
+BR33_2      2 27434026    0.9755404
+BR33_3      2 17108986    0.9485201
+Brcon_1     1 11243431    1.0368917
+Brcon_2     1 12997874    1.0608906
+Brcon_3     1 13484101    1.0228056
+
+$table
+                   logFC   logCPM         F       PValue
+BR_mtDNA_COX1 -0.2291013 14.23482  3.403018 0.1084159561
+BR_mtDNA_NAD2 -0.4617196 12.43697 19.035868 0.0034561375
+BR_mtDNA_NAD1 -0.7302831 11.18584 55.146052 0.0001606708
+BR_mtDNA_COX2 -0.3605065 12.79056  9.668201 0.0175203461
+BR_mtDNA_CYTB -0.3798796 12.55693 11.471718 0.0119899315
+10596 more rows ...
+
+$comparison
+[1] "group2"
+
+$df.test
+[1] 1 1 1 1 1
+10596 more elements ...
+
+$df.total
+[1] 6.866862 6.866862 6.866862 6.866862 6.866862
+10596 more elements ...
+
+> qlf$table
+                           logFC    logCPM            F       PValue
+BR_mtDNA_COX1      -2.291013e-01 14.234816 3.403018e+00 1.084160e-01
+...and alot more lines
+
+R_TCALIF_00020-PA  2.152432e-01  5.537988 5.777519e+00 4.788328e-02
+> write.table(qlf$table,"BR_edgeR_output.txt")
+> qlf$table$PValue
+   [1] 1.084160e-01 3.456138e-03 1.606708e-04 1.752035e-02 1.198993e-02 2.571122e-04 1.431472e-02 1.632699e-03 9.909984e-04
+	...and alot more lines
+ [ reached getOption("max.print") -- omitted 9601 entries ]
+ 
+> p.adjust(qlf$table$PValue, method = "fdr")
+   [1] 1.723115e-01 2.081734e-02 3.997532e-03 5.003588e-02 4.038028e-02 5.245222e-03 4.439741e-02 1.398231e-02 1.083820e-02
+   ...and alot more lines
+ [ reached getOption("max.print") -- omitted 9601 entries ]
+
+> BR_fdr = p.adjust(qlf$table$PValue, method = "fdr")
+> head qlf$table
+Error: unexpected symbol in "head qlf"
+> head(qlf$table)
+                   logFC   logCPM         F       PValue
+BR_mtDNA_COX1 -0.2291013 14.23482  3.403018 0.1084159561
+BR_mtDNA_NAD2 -0.4617196 12.43697 19.035868 0.0034561375
+BR_mtDNA_NAD1 -0.7302831 11.18584 55.146052 0.0001606708
+BR_mtDNA_COX2 -0.3605065 12.79056  9.668201 0.0175203461
+BR_mtDNA_CYTB -0.3798796 12.55693 11.471718 0.0119899315
+BR_mtDNA_NAD4 -0.7088866 11.75290 47.318583 0.0002571122
+> head(BR_fdr)
+[1] 0.172311477 0.020817337 0.003997532 0.050035881 0.040380279 0.005245222
+> BR_edgeR_final = cbind(qlf$table,BR_fdr)
+> head(BR_edgeR_final)
+                   logFC   logCPM         F       PValue      BR_fdr
+BR_mtDNA_COX1 -0.2291013 14.23482  3.403018 0.1084159561 0.172311477
+BR_mtDNA_NAD2 -0.4617196 12.43697 19.035868 0.0034561375 0.020817337
+BR_mtDNA_NAD1 -0.7302831 11.18584 55.146052 0.0001606708 0.003997532
+BR_mtDNA_COX2 -0.3605065 12.79056  9.668201 0.0175203461 0.050035881
+BR_mtDNA_CYTB -0.3798796 12.55693 11.471718 0.0119899315 0.040380279
+BR_mtDNA_NAD4 -0.7088866 11.75290 47.318583 0.0002571122 0.005245222
+> write.table(BR_edgeR_final,"BR_edgeR_output_final.txt")
+> plotMD(qlf)
+> logcpm <- cpm(y, prior.count=2, log=TRUE)
+> head(logcpm)
+                BR33_1   BR33_2   BR33_3  Brcon_1  Brcon_2  Brcon_3
+BR_mtDNA_COX1 14.06079 14.06328 14.21746 14.26695 14.37010 14.39428
+BR_mtDNA_NAD2 12.23896 12.07329 12.24448 12.60927 12.62402 12.71284
+BR_mtDNA_NAD1 10.86242 10.71249 10.74589 11.46193 11.44558 11.60309
+BR_mtDNA_COX2 12.64804 12.46701 12.67354 12.95179 12.87044 13.05086
+BR_mtDNA_CYTB 12.32695 12.27561 12.45509 12.66712 12.68315 12.84608
+BR_mtDNA_NAD4 11.39374 11.29673 11.37389 12.06004 11.95131 12.17289
+> logcpm <- cpm(y, prior.count=2, log=FALSE)
+> head(logcpm)
+                 BR33_1    BR33_2    BR33_3   Brcon_1   Brcon_2   Brcon_3
+BR_mtDNA_COX1 17089.019 17118.521 19049.290 19714.074 21175.225 21533.230
+BR_mtDNA_NAD2  4833.748  4309.345  4852.289  6248.295  6312.493  6713.355
+BR_mtDNA_NAD1  1861.603  1677.839  1717.133  2820.757  2788.970  3110.731
+BR_mtDNA_COX2  6418.489  5661.547  6532.942  7922.651  7488.258  8485.809
+BR_mtDNA_CYTB  5137.740  4958.114  5614.973  6503.909  6576.611  7362.880
+BR_mtDNA_NAD4  2690.531  2515.562  2653.773  4269.949  3959.948  4617.371
+> plotMDS(y)
+> write.table(logcpm,"BR_edgeR_output_cpm.txt")
