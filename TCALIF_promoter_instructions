@@ -1,3 +1,10 @@
+A.Graham 2017
+
+files needed include...
+(1) .gff3 of a genome reference
+
+------------------------------------------------------------------
+
 #setting working directory
 >setwd("~/Desktop/R_tcalif")
 
