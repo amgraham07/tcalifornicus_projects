@@ -1,0 +1,77 @@
+AMGraham 2018
+
+Specific: mirdeep protocol for temperature stress experiment, partially based on the mirdeep2 tutorial
+
+Files needed include...
+(1) small RNA sequencing files for each replicate
+(2)	tigriopus genome
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Tutorial preliminary files:
+
+cel_cluster.fa:                     a fasta file with the reference genome (this file is in fact a ~6 kb region of the C. elegans chromosome II).
+
+mature_ref_this_species.fa:         a fasta file with the reference miRBase mature miRNAs for the species (C. elegans miRBase v.14 mature miRNAs)
+
+mature_ref_other_species.fa:        a fasta file with the reference miRBase mature miRNAs for related species (C. briggsae and D. melanogaster miRBase v.14 mature miRNAs)
+
+precursors_ref_this_species.fa:     a fasta file with the reference miRBase precursor miRNAs for the species (C. elegans miRBase v.14 precursor miRNAs)
+
+reads.fa:                           a fasta file with the deep sequencing reads.
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+Analysis:
+
+
+
+Step 1: build an index of the genome
+tutorial example: bowtie-build cel_cluster.fa cel_cluster
+> bowtie-build TCALIF_genome.fasta TCALIF_genome
+
+
+Step 2a: Unzip, convert to fasta (FastX_toolkit)
+> gunzip -c BR33_1_mirna_adapt.fastq.gz >BR33_1_mirna_adapt.fastq
+> fastq_to_fasta -Q 33 -r -i BR33_1_mirna_adapt.fastq -o BR33_1_mirna_adapt.fasta
+
+
+Step 2b: process reads and map them to the genome
+
+The -c option designates that the input file is a fasta file (for other input formats, see the README file). The -j options removes entries with
+non-canonical letters (letters other than a,c,g,t,u,n,A,C,G,T,U,N). The -k option clips adapters. The -l option discards reads shorter than 18 nts.
+The -m option collapses the reads. The -p option maps the processed reads against the previously indexed genome (cel_cluster). The -s option
+designates the name of the output file of processed reads and the -t option designates the name of the output file of the genome mappings. Last,
+-v gives verbose output to the screen.
+
+tutorial example: mapper.pl reads.fa -c -j -k TCGTATGCCGTCTTCTGCTTGT  -l 18 -m -p cel_cluster -s reads_collapsed.fa -t reads_collapsed_vs_genome.arf -v
+> mapper.pl BR33_1_mirna_adapt.fasta -q -c -i -j -l 18 -m -p TCALIF_genome -s BR33_1_mapper -t BR33_1_collapsed_vs_genome.arf -v
+
+
+Step 3: Identification of novel miRNAs in deep sequencing data --> The user wishes to identify miRNAs in deep sequencing data from an animal with no related species
+in miRBase
+
+tutorial example: miRDeep2.pl reads_collapsed.fa genome.fa reads_collapsed_vs_genome.arf none none none 2>report.log
+> miRDeep2.pl BR33_1_mapper TCALIF_genome.fasta BR33_1_collapsed_vs_genome.arf none none none 2>tcalif_miRNA_report.log
+
+
+Step 4: Determine miRNAs from criteria (not shown here) and then extract from files
+* a master list of miRNAs was compiled after running through the pipeline for the different populations*
+
+> perl -ne 'if(/^>(\S+)/){$c=$i{$1}}$c?print:chomp;$i{$_}=1 if @ARGV' BR33_1_miRNA_list.txt novel_mature_17_01_2018_t_09_52_00_score-50_to_na.txt > BR33_1_miRNA_mature.txt
+> perl -ne 'if(/^>(\S+)/){$c=$i{$1}}$c?print:chomp;$i{$_}=1 if @ARGV' BR33_1_miRNA_list.txt tcalif_precursors.txt > BR33_1_miRNA_precursor.txt
+*Combined files, renamed (excel), then got rid of duplicate values (ie. the awk command below)*
+>awk '/^>/{f=!d[$1];d[$1]=1}f' TCALIF_masterlist_renamed_mature.txt > TCALIF_masterlist_renamed_mature_nd.txt
+
+Step 5: map the rest of the samples to the genome
+> mapper.pl BR33_1_mirna_adapt.fasta -q -c -i -j -l 18 -m -p TCALIF_genome -s BR33_1_mapper -t BR33_1_collapsed_vs_genome.arf -v
+
+
+Step 6: quantify miRNAs in the sample from previous (individual) mapping file, but with masterlist miRNA precursor/mature sequences with new provisional names (population specific), no PDF (-j)
+
+tutorial example: quantifier.pl -p precursors_ref_this_species.fa -m mature_ref_this_species.fa -r reads_collapsed.fa -t cel -y 16_19
+> quantifier.pl -j -p BR_masterlist_renamed_precursors.txt -m BR_masterlist_renamed_mature.txt -r BR33_1_mapper
+> quantifier.pl -j -p SD_masterlist_renamed_precursors.txt -m SD_masterlist_renamed_mature.txt -r SD33_1_mapper
+*from .csv output, make sure you only use raw read_count from output rather than normalized for EdgeR*
