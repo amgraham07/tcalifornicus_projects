@@ -1,3 +1,14 @@
+A.Graham June 2018 (Big help from http://avrilomics.blogspot.com/2015/07/using-topgo-to-test-for-go-term.html)
+general use: TopGO (Gene Ontology Terms) for RNA-seq experiment output
+example: TopGO for SD hypoxia mRNA significantly differentially expressed genes at 3 hours
+
+Files needed include...
+(1) "annotation" - full gene list with GO terms associated with each
+(2) "interesting genes" - list of significantly differentially expressed genes
+(3) "universe" - everything else (ie all other genes, comparision)
+
+------------------------------------------------------------
+
 source("http://bioconductor.org/biocLite.R")
 biocLite()
 library(topGO)
@@ -8,6 +19,7 @@ genesOfInterest <- as.character(genesOfInterest$V1)
 geneList <- factor(as.integer(geneUniverse %in% genesOfInterest))
 names(geneList) <- geneUniverse
 
+#Biological Process
 myGOdata <- new("topGOdata", description="My project", ontology="BP", allGenes=geneList,  annot = annFUN.gene2GO, gene2GO = geneID2GO)
 sg <- sigGenes(myGOdata)
 str(sg)
@@ -16,6 +28,7 @@ resultFisher <- runTest(myGOdata, algorithm="classic", statistic="fisher")
 allRes <- GenTable(myGOdata, classicFisher = resultFisher, orderBy = "resultFisher", ranksOf = "classicFisher", topNodes = 10)
 write.table(allRes, "3hr_0.1_BP_output.txt")
 
+#Molecular Function
 myGOdata <- new("topGOdata", description="My project", ontology="MF", allGenes=geneList,  annot = annFUN.gene2GO, gene2GO = geneID2GO)
 sg <- sigGenes(myGOdata)
 str(sg)
@@ -24,6 +37,7 @@ resultFisher <- runTest(myGOdata, algorithm="classic", statistic="fisher")
 allRes <- GenTable(myGOdata, classicFisher = resultFisher, orderBy = "resultFisher", ranksOf = "classicFisher", topNodes = 10)
 write.table(allRes, "3hr_0.1_MF_output.txt")
 
+#Cellular Component
 myGOdata <- new("topGOdata", description="My project", ontology="CC", allGenes=geneList,  annot = annFUN.gene2GO, gene2GO = geneID2GO)
 sg <- sigGenes(myGOdata)
 str(sg)
