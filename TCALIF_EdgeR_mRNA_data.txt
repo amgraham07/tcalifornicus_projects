@@ -1,6 +1,6 @@
 A.Graham Jan 2018
 general use: EdgeR for RNA-seq experiment, based on portions of EdgeR manual
-example: EdgeR for BR temperature mRNA (miRNA experiment), after using Salmon to pseudoalign against a T.calif CDS reference for 6 samples (3 replicates for 33 degrees, and 3 replicates for control temperature)
+example: EdgeR for BR temperature mRNA (miRNA experiment), after using Salmon to pseudoalign against a T.calif CDS reference for 6 samples (3 replicates for 33 degrees, and 3 replicates for control temperature).
 
 Files needed include...
 (1) combined txt file with all counts (ie. output.sf files)
@@ -12,7 +12,7 @@ Specific Commands, :
 x <- read.delim("BR_temperature_mRNA_counts_all.txt",row.names="Name")
 head(x)
 #specifies the  groups for which to analyze, and in what order they are in the .txt file - in this case "2" is experimental temperature and "1" is control
-group <- factor(c(2,2,2,1,1,1))
+group <- factor(c(1,1,1,2,2,2))
 y <- DGEList(counts=x,group=group)
 y
 y$samples
@@ -34,10 +34,10 @@ qlf$table
 write.table(qlf$table,"BR_edgeR_output.txt")
 qlf$table$PValue
 p.adjust(qlf$table$PValue, method = "fdr")
-SD_fdr = p.adjust(qlf$table$PValue, method = "fdr")
+BR_fdr = p.adjust(qlf$table$PValue, method = "fdr")
 head(qlf$table)
-SD_edgeR_final = cbind(qlf$table,BR_fdr)
-head(SD_edgeR_final)
+BR_edgeR_final = cbind(qlf$table,BR_fdr)
+head(BR_edgeR_final)
 #writes the FDR associated with the previous output
 write.table(BR_edgeR_final,"BR_edgeR_output_final.txt")
 #makes a basic volcano plot
