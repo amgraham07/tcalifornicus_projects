@@ -1,0 +1,24 @@
+A.Graham Oct 2018
+general use: Pearson correlation of between miRNA/mRNA-seq, based on portions of miRlab manual
+example: Temperature mRNA and miRNA (paired RNA-seq experiment), in combination with predicted miRNA from miRanda 
+for the BR population
+
+Files needed include...
+(1) log transformed cpm tables for both miRNA and mRNA
+(2) predicted miranda targets for miRNA
+
+------------------------------------------------------------
+source("https://bioconductor.org/biocLite.R")
+biocLite("miRLAB")
+library(miRLAB)
+
+#make sure expression values are log-transformed
+BR_pearson=Pearson(datacsv = "BR_miRLAB_log.csv", cause = 1:4, effect = 5:3848, targetbinding = NA)
+BR_pearson_miranda=Pearson(datacsv = "BR_miRLAB_log.csv", cause = 1:4, effect = 5:3848, targetbinding = "BR_miranda_targets.csv")
+
+#writes tables out with and without the known miranda target information
+write.table(BR_pearson, "BR_miRLAB_log_pearson.txt")
+write.table(BR_pearson_miranda, "BR_miRLAB_log_pearson_miranda.txt")
+
+#brings up the top 100 targets correlated with a specific miRNA
+miR39Top100=bRank(pearson, 2, 100, TRUE)
