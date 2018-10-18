@@ -6,3 +6,4 @@
 #### [4] TCALIF_RNAseq_protocol: commands and flags for aligning mRNA reads to a reference using Bowtie2, or quasi-align the reads using SALMON, plus quantification using SALMON
 #### [5] TCALIF_TopGO: instructions for how to use TopGO in R for idenifying Gene Ontology (GO) terms associated with significantly differentially expressed genes
 #### [6] edgeR_contrasts_between_times.R: instructions for how to compare different time points against each other, in combination with their controls
+#### [7] mirLab: instructions for how to compare paired miRNA/mRNA-seq datasets for correlations on expression patterns
