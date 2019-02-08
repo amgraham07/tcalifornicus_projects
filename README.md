@@ -1,6 +1,6 @@
 # tcalifornicus_projects (OSU)
 ## This repository includes odds-and-ends associated with Tigriopus projects, in the form of scripts and instructions
-### Some of these scripts have been featured in various publications during my postdoctoral fellowship, including: in Molecular Ecology (https://doi.org/10.1111/mec.14973)
+### Some of these scripts have been featured in various publications during my NSF postdoctoral fellowship, including: in Molecular Ecology (https://doi.org/10.1111/mec.14973)
 #### [1] TCALIF_promoter_instructions: instructions for how to extract upstream promoter regions for a genome not currently available through Bioconductor packages (based on "Bioinformatics Data Skills" by Vince Buffalo)
 #### [2] EdgeR_mRNA_data: instructions for how to perform a basic differential expression analysis in program EdgeR, with specific commands and example output for those commands
 #### [3] TCALIF_mirdeep2_protocol: instructions on how to utilize the mirdeep2 pipeline for identifying miRNAs from sequencing data, with specific commands and explanations (involves mirbase mature miRNAs - mirbase_mature_jan_2018.fa)
