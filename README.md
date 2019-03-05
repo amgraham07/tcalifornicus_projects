@@ -8,3 +8,4 @@
 #### [5] TCALIF_TopGO: instructions for how to use TopGO in R for idenifying Gene Ontology (GO) terms associated with significantly differentially expressed genes
 #### [6] edgeR_contrasts_between_times.R: instructions for how to compare different time points against each other, in combination with their controls
 #### [7] mirLab: instructions for how to compare paired miRNA/mRNA-seq datasets for correlations on expression patterns
+#### [8] for_loop_HMMR pipeline: instructions for how to comb through protein models for proteins containing a specific domain
