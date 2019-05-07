@@ -9,7 +9,7 @@ dir=`dirname $fn`;
 # get just the file (without the path)
 base=`basename $fn`;
 
-# the read filename, without the *_pep.fa suffix
+# the read filename, without the *_PROT.fasta suffix
 rf=${base%.*_PROT.fasta};
 
 # Do whatever we want with it
