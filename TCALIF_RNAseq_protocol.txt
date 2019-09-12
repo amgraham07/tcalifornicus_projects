@@ -3,8 +3,12 @@ AMGraham 2018
 RNAseq protocol for temperature stress/miRNA experiment
 
 Files needed include...
-(1) small RNA sequencing files for each replicate, pre-filtered/clipped
-(2)	tigriopus transcriptome 
+(1) RNA sequencing files for each replicate, pre-filtered/clipped
+(2)	tigriopus transcriptome
+
+Two options: Use bowtie/Salmon combination (takes longer, more memory intensive), or Salmon all the way through (quicker)
+
+-------------
 
 Step 1: Index reference
 
