@@ -1,0 +1,39 @@
+###From Felipe's filtered version of the vcf to the input files for both snp_location and genotype
+
+##SNP LOCATION
+##delete first 499 lines of the file (all vcf notes) or lines that start with two ##
+sed '/##/d' parent.subset.eQTL.MAF25.vcf > snp_loc_1.txt
+
+##Get first two columns for snp position (delimiter is tab):
+cut -f1,2 d$'\t' gene_loc_1.vcf > snp_loc_2.txt
+
+##replace a tab with an underscore (tab = control + V +tab on mac)
+sed -i.bak -E "s/tab/_/g" snp_loc_2.txt
+
+##combine files as columns
+paste snp_loc_3.txt snp_loc_2.txt |column -s $'\t' -t > snp_loc_4.txt
+
+##get rid of weird spaces, replace with a single tab
+sed -i.bak -E "s/      /   /g"  snp_loc_5.txt
+
+##GENOTYPE
+##recode vcf file for maf minor as alt and maf major as ref
+SGE_Batch -c 'plink --vcf parent.subset.eQTL.MAF25.vcf --recode vcf --allow-extra-chr --out parent.subset.eQTL.MAF25_recode.vcf' -r plink_recode -M grahaall@oregonstate.edu
+
+##Query for specific columns (chrom, pos, GT)
+bcftools query -f '%CHROM\t%POS\tGT:[ %GT]\n' -H -o parent.subset.eQTL.MAF25_recode_query.txt parent.subset.eQTL.MAF25_recode.vcf
+
+##get rid of first 2 columns
+cut -d$'\t' -f3- parent.subset.eQTL.MAF25_recode_query.txt > geno.txt
+
+##replace GT: with nothing
+sed -i -e 's/GT: //g' geno.txt
+
+##combine files as columns
+paste snp_loc_3.txt geno.txt |column -s $'\t' -t > geno_2.txt
+
+##Replace genotypes through sed
+./. missing data = NA
+0/0 homozygous minor = 0
+0/1 heterozygous = 1
+1/1 homozygous major = 2
