@@ -11,3 +11,4 @@
 #### [8] mirLab: instructions for how to compare paired miRNA/mRNA-seq datasets for correlations on expression patterns
 #### [9] for_loop_HMMR pipeline: instructions for how to comb through protein models for proteins containing a specific domain
 #### [10] matrixEQTL.R: instructions for how to use matrixEQTL to get cis- and trans-eQTLs from snp + gene expression data
+#### [11] eQTL_notes: instructions for how to format input files (snp_location and genotype) from a vcf output file
