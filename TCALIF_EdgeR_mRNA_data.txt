@@ -42,7 +42,7 @@ head(BR_edgeR_final)
 write.table(BR_edgeR_final,"BR_edgeR_output_final.txt")
 #makes a basic volcano plot
 plotMD(qlf)
-logcpm <- cpm(y, prior.count=2, log=FALSE)
+logcpm <- cpm(y, prior.count=2, log=TRUE)
 head(logcpm)
 write.table(logcpm,"BR_edgeR_output_cpm.txt")
 #performs a "PCA" of the samples
