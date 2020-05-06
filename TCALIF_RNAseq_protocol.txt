@@ -1,10 +1,15 @@
-AMGraham 2018
+AMGraham 2018 (Updated 2020)
 
-RNAseq protocol for temperature stress/miRNA experiment
+Instructions for RNAseq counts for a transcriptome using either SALMON and bowtie or STAMPY and HTseq
+
+-------------
+PART I: SALMON and bowtie combination
+
+example: RNAseq protocol for temperature stress/miRNA experiment
 
 Files needed include...
 (1) RNA sequencing files for each replicate, pre-filtered/clipped
-(2)	tigriopus transcriptome
+(2) tigriopus transcriptome
 
 Two options: Use bowtie/Salmon combination (takes longer, more memory intensive), or Salmon all the way through (quicker)
 
@@ -38,3 +43,27 @@ Step 2: Quasi map the reads to the indexed reference using Salmons algorithms
 
 salmon quant -i transcripts_index -l <LIBTYPE> -r reads.fq -o transcripts_quant
 >salmon quant -i BR_CDS_MainIsoforms_mtDNA_index -l SR -r BR33_1_mrna_adapt.fastq.gz -o BR33_1_mrna_quant_mtDNA --fldMean 260
+
+--------------
+
+PART II: STAMPY and HTseq; used when mapping against slightly divergent references (different populations and crosses)
+
+Step 1: Index then hash the reference
+>stampy.py -g BRv0.1_transcripts_eqSD -h SDv2.1_transcripts_eqBR -M BRv0.1_transcripts_eqSD.fasta
+>stampy.py -g BRv0.1_transcripts_eqSD -H BRv0.1_transcripts_eqSD
+
+Step 2: Align using STAMPY (${dir}/${rf} = individual sample IDs)
+>stampy.py -g BRv0.1_transcripts_eqSD -h BRv0.1_transcripts_eqSD --substitutionrate=0.05 -M ${dir}/${rf}_mrna_trimmed.fastq.gz -o ${dir}/${rf}_stampy.sam
+
+Step 3: Convert sam to bam output
+>samtools view -S -b ${dir}/${rf}_stampy.sam > ${dir}/${rf}_stampy.bam
+
+Step 4: Index reference again using bwa
+>bwa index BRv0.1_transcripts_eqSD.fasta
+
+Step 5: Convert your transcriptome fasta file to a gff3 file (pl script available on my github)
+>perl fasta_to_gff.pl --fasta_dir BRv0.1_transcripts_eqSD.fasta --gfffilename BRv0.1_transcripts_eqSD.gff3 --type CDS --nosequence
+
+Step 6: Map using HTseq
+>htseq-count --format=bam --stranded=no --type=CDS --order=pos --idattr=Name ${dir}/${rf}_stampy.bam BRv0.1_transcripts_eqSD.gff3 > ${dir}/${rf}_htseq_counts.txt
+
