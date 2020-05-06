@@ -5,7 +5,7 @@
 #### [2] extract_promoters.sh: requires samtools, bamtools and gfftobed (below, edited from original version on github by RimGubaev)
 #### [3] EdgeR_mRNA_data: instructions for how to perform a basic differential expression analysis in program EdgeR, with specific commands and example output for those commands
 #### [4] TCALIF_mirdeep2_protocol: instructions on how to utilize the mirdeep2 pipeline for identifying miRNAs from sequencing data, with specific commands and explanations (involves mirbase mature miRNAs - mirbase_mature_jan_2018.fa)
-#### [5] TCALIF_RNAseq_protocol: commands and flags for aligning mRNA reads to a reference using Bowtie2, or quasi-align the reads using SALMON, plus quantification using SALMON
+#### [5] TCALIF_RNAseq_protocol: commands and flags for aligning mRNA reads several differen ways including Salmon, Salmon + bowtie, and STAMPY + HTseq
 #### [6] fasta_to_gff.pl: converts fasta file to gff3 format, attributed to Scott Cain (also available here https://github.com/scottcain/chado_test/blob/master/chado/bin/gmod_fasta2gff3.pl)
 #### [7] TCALIF_TopGO: instructions for how to use TopGO in R for idenifying Gene Ontology (GO) terms associated with significantly differentially expressed genes
 #### [8] edgeR_contrasts_between_times.R: instructions for how to compare different time points against each other, in combination with their controls
