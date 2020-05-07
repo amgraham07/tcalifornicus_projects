@@ -58,12 +58,9 @@ Step 2: Align using STAMPY (${dir}/${rf} = individual sample IDs)
 Step 3: Convert sam to bam output
 >samtools view -S -b ${dir}/${rf}_stampy.sam > ${dir}/${rf}_stampy.bam
 
-Step 4: Index reference again using bwa
->bwa index BRv0.1_transcripts_eqSD.fasta
-
-Step 5: Convert your transcriptome fasta file to a gff3 file (pl script available on my github)
+Step 4: Convert your transcriptome fasta file to a gff3 file (pl script available on my github)
 >perl fasta_to_gff.pl --fasta_dir BRv0.1_transcripts_eqSD.fasta --gfffilename BRv0.1_transcripts_eqSD.gff3 --type CDS --nosequence
 
-Step 6: Map using HTseq
+Step 5: Map using HTseq
 >htseq-count --format=bam --stranded=no --type=CDS --order=pos --idattr=Name ${dir}/${rf}_stampy.bam BRv0.1_transcripts_eqSD.gff3 > ${dir}/${rf}_htseq_counts.txt
 
