@@ -49,14 +49,14 @@ salmon quant -i transcripts_index -l <LIBTYPE> -r reads.fq -o transcripts_quant
 PART II: STAMPY and HTseq; used when mapping against slightly divergent references (different populations and crosses)
 
 Step 1: Index then hash the reference
->stampy.py -g BRv0.1_transcripts_eqSD -h SDv2.1_transcripts_eqBR -M BRv0.1_transcripts_eqSD.fasta
+>stampy.py -G BRv0.1_transcripts_eqSD -h BRv0.1_transcripts_eqSD.fasta
 >stampy.py -g BRv0.1_transcripts_eqSD -H BRv0.1_transcripts_eqSD
 
 Step 2: Align using STAMPY (${dir}/${rf} = individual sample IDs)
 >stampy.py -g BRv0.1_transcripts_eqSD -h BRv0.1_transcripts_eqSD --substitutionrate=0.05 -M ${dir}/${rf}_mrna_trimmed.fastq.gz -o ${dir}/${rf}_stampy.sam
 
-Step 3: Convert sam to bam output
->samtools view -S -b ${dir}/${rf}_stampy.sam > ${dir}/${rf}_stampy.bam
+Step 3: Convert sam to bam output + sort by name
+samtools sort -n ${dir}/${rf}_stampy.sam -o ${dir}/${rf}_stampy.sorted.bam
 
 Step 4: Convert your transcriptome fasta file to a gff3 file (pl script available on my github)
 >perl fasta_to_gff.pl --fasta_dir BRv0.1_transcripts_eqSD.fasta --gfffilename BRv0.1_transcripts_eqSD.gff3 --type CDS --nosequence
