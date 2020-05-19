@@ -48,8 +48,8 @@ salmon quant -i transcripts_index -l <LIBTYPE> -r reads.fq -o transcripts_quant
 
 PART II: STAMPY and HTseq; used when mapping against slightly divergent references (different populations and crosses)
 
-Step 1: Index then hash the reference
->stampy.py -G BRv0.1_transcripts_eqSD -h BRv0.1_transcripts_eqSD.fasta
+Step 1: Build then hash the reference
+>stampy.py -G BRv0.1_transcripts_eqSD BRv0.1_transcripts_eqSD.fasta
 >stampy.py -g BRv0.1_transcripts_eqSD -H BRv0.1_transcripts_eqSD
 
 Step 2: Align using STAMPY (${dir}/${rf} = individual sample IDs)
